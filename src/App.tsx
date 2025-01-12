@@ -1,13 +1,10 @@
 import './App.css'
-import Header from './components/ui/header'
-
+import Home from './components/pages/home'
 function App() {
 
   return (
     <>
-      <div className="flex items-center justify-center">
-        <Header />
-      </div>
+      <Home />
     </>
   )
 }

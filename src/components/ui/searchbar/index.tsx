@@ -1,5 +1,4 @@
 import { useState } from "react";
-import btcLogo from "../../../assets/btc.svg";
 import { FaSearch } from "react-icons/fa";
 
 interface SearchBarProps {
@@ -22,26 +21,19 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
     };
 
     return (
-        <div className="bg-zinc-950 py-4 mt-4 shadow-sm">
-            <div className="max-w-[1280px] mx-auto px-2 py-2 border-2 border-gray-600 text-gray-600 bg-zinc-950 hover:border-gray-500  rounded  flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-0 transition">
-                <div className="flex flex-row">
-                    <img
-                        src={btcLogo}
-                        alt="Logo"
-                        className="w-8 ml-2 object-contain"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search by block, transaction, hash, or address"
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        className="w-full sm:w-[500px] px-4 py-2 caret-orange-400  text-gray-600 bg-zinc-950 focus:outline-none focus:text-white transition"
-                    />
-                </div>
+        <div className="bg-zinc-950 py-4 shadow-sm">
+            <div className="max-w-[1280px] mx-auto text-gray-600 bg-zinc-950 hover:border-gray-500  rounded  flex flex-row sm:flex-row items-center transition">
+                <input
+                    type="text"
+                    placeholder="Enter an address, block height, or tx hash"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="w-full sm:w-[550px] px-2 py-2 caret-orange-500  text-gray-600 bg-zinc-950 border-orange-500 border-2 focus:outline-none focus:text-white transition rounded"
+                />
                 <button
                     onClick={handleSearch}
-                    className="w-full sm:w-auto flex items-center justify-center px-4 py-2 border-2 bg-zinc-950 border-gray-500 text-gray-400 font-bold hover:border-orange-400 hover:text-orange-400 rounded transition"
+                    className="flex items-center justify-center px-4 py-3 -ml-2 border-2 bg-orange-500 border-orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition"
                 >
                     <FaSearch size={16} />
                 </button>

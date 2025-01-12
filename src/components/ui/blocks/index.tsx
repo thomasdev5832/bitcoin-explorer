@@ -1,3 +1,4 @@
+import { FaCube } from "react-icons/fa";
 interface Block {
     height: number;
     timestamp: string;
@@ -12,7 +13,10 @@ interface BlocksProps {
 export default function Blocks({ blocks }: BlocksProps) {
     return (
         <div>
-            <h2 className="text-xl font-bold text-orange-400 mb-4">Latest Blocks</h2>
+            <div className="flex flex-row items-center mb-2">
+                <FaCube className="text-orange-500 text-2xl mr-2" />
+                <h2 className="text-xl text-left font-bold text-orange-500">Latest Blocks</h2>
+            </div>
             <div className="overflow-x-auto">
                 <table className="hidden sm:table w-full max-w-4xl mx-auto border-collapse border border-gray-600 text-sm">
                     <thead>
@@ -44,16 +48,16 @@ export default function Blocks({ blocks }: BlocksProps) {
                         className="border border-gray-600 mb-4 p-4 rounded bg-zinc-900 text-gray-400"
                     >
                         <p>
-                            <span className="font-bold text-orange-400">Height:</span> {block.height}
+                            <span className="font-bold text-orange-500">Height:</span> {block.height}
                         </p>
                         <p>
-                            <span className="font-bold text-orange-400">Timestamp:</span> {block.timestamp}
+                            <span className="font-bold text-orange-500">Timestamp:</span> {block.timestamp}
                         </p>
                         <p>
-                            <span className="font-bold text-orange-400">Miner:</span> {block.miner}
+                            <span className="font-bold text-orange-500">Miner:</span> {block.miner}
                         </p>
                         <p>
-                            <span className="font-bold text-orange-400">Transactions:</span> {block.transactions}
+                            <span className="font-bold text-orange-500">Transactions:</span> {block.transactions}
                         </p>
                     </div>
                 ))}

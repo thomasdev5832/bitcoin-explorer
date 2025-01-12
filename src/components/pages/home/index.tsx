@@ -1,3 +1,5 @@
+import Banner from "../../ui/banner";
+import BitcoinInfo from "../../ui/bitcoin-info";
 import Blocks from "../../ui/blocks";
 import Footer from "../../ui/footer";
 import Header from "../../ui/header";
@@ -25,13 +27,15 @@ const mockTransactions = [
 
 export default function Home() {
     return (
-        <div className="w-full flex flex-col items-center justify-center">
+        <div className="w-full flex flex-col items-center justify-center gap-10">
             <Header />
+            <Banner />
             <SearchBar onSearch={query => console.log(query)} />
             <div className="max-w-[1280px] mx-auto mt-4 px-4 flex flex-col gap-4">
                 <Blocks blocks={mockBlocks} />
                 <Transactions transactions={mockTransactions} />
             </div>
+            <BitcoinInfo />
             <Footer />
         </div>
     );

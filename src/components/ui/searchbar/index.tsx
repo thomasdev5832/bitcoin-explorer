@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaExchangeAlt, FaSearch, FaCube } from "react-icons/fa";
+import { FaExchangeAlt, FaSearch, FaCube, FaWallet } from "react-icons/fa";
 
 interface Transaction {
     txid: string;
@@ -17,6 +17,12 @@ interface Block {
     tx: string[];
 }
 
+interface WalletBalanceDetailsProps {
+    address: string;
+    walletName: string;
+    balance: number;
+}
+
 interface SearchFieldProps {
     onSearch: (query: string) => void;
     placeholder: string;
@@ -29,6 +35,7 @@ const SearchField = ({ onSearch, placeholder, isLoading }: SearchFieldProps) => 
     const handleSearch = () => {
         if (inputValue.trim()) {
             onSearch(inputValue);
+            setInputValue('');
         }
     };
 
@@ -64,6 +71,9 @@ export default function SearchBar() {
     const [blockResult, setBlockResult] = useState<Block | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [balance, setBalance] = useState<number | undefined>(undefined);
+    const [searchPerformed, setSearchPerformed] = useState(false);
+    const [searchedAddress, setSearchedAddress] = useState('');
 
     const API_BASE_URL = "https://cors-anywhere.herokuapp.com/http://ec2-3-86-252-180.compute-1.amazonaws.com:18443";
     const AUTH_HEADER = 'Basic ' + btoa('user:pass');
@@ -95,7 +105,6 @@ export default function SearchBar() {
         return data.result;
     };
 
-    /*
     const listLastTransactions = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
@@ -258,7 +267,139 @@ export default function SearchBar() {
             console.log('Error fetching blocks:', error instanceof Error ? error.message : 'Unknown error');
         }
     };
-    */
+
+    const listAllWallets = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': AUTH_HEADER,
+                },
+                body: JSON.stringify({
+                    jsonrpc: "1.0",
+                    id: "listwallets",
+                    method: "listwallets",
+                    params: []
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error.message || 'Unknown error fetching wallets');
+            }
+
+            console.log('All Wallets:', data.result);
+        } catch (error) {
+            console.error('Error:', error);
+            console.log('Error fetching wallets:', error instanceof Error ? error.message : 'Unknown error');
+        }
+    };
+
+    const listAllWalletsWithBalances = async () => {
+        try {
+            const walletsResponse = await fetch(`${API_BASE_URL}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': AUTH_HEADER,
+                },
+                body: JSON.stringify({
+                    jsonrpc: "1.0",
+                    id: "listwallets",
+                    method: "listwallets",
+                    params: []
+                })
+            });
+
+            if (!walletsResponse.ok) {
+                throw new Error(`HTTP error listing wallets! status: ${walletsResponse.status}`);
+            }
+
+            const walletsData = await walletsResponse.json();
+
+            if (walletsData.error) {
+                throw new Error(walletsData.error.message || 'Unknown error fetching wallets');
+            }
+
+            const wallets = walletsData.result;
+
+            const walletsWithBalances = await Promise.all(wallets.map(async (wallet: unknown) => {
+                const walletInfoResponse = await fetch(`${API_BASE_URL}/wallet/${wallet}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': AUTH_HEADER,
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: "1.0",
+                        id: "getwalletinfo",
+                        method: "getwalletinfo",
+                        params: []
+                    })
+                });
+
+                if (!walletInfoResponse.ok) {
+                    console.error(`Error fetching info for wallet ${wallet}:`, walletInfoResponse.status);
+                    return { name: wallet, balance: 'Error fetching balance' };
+                }
+
+                const walletInfo = await walletInfoResponse.json();
+
+                if (walletInfo.error) {
+                    console.error(`Error fetching info for wallet ${wallet}:`, walletInfo.error.message);
+                    return { name: wallet, balance: 'Error fetching balance' };
+                }
+
+                return { name: wallet, balance: walletInfo.result.balance };
+            }));
+
+            console.log('Wallets with Balances:', walletsWithBalances);
+        } catch (error) {
+            console.error('Error:', error);
+            console.log('Error fetching wallets or balances:', error instanceof Error ? error.message : 'Unknown error');
+        }
+    };
+
+    const listUnspentForAddress = async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': AUTH_HEADER,
+                },
+                body: JSON.stringify({
+                    jsonrpc: "1.0",
+                    id: "listunspent",
+                    method: "listunspent",
+                    params: []
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error.message || 'Unknown error fetching UTXOs');
+            }
+
+            // Listar endereços únicos com saldo
+            const addresses = [...new Set(data.result.map((utxo: { address: unknown; }) => utxo.address))];
+            console.log('Addresses with balance:', addresses);
+        } catch (error) {
+            console.error('Error:', error);
+            console.log('Error fetching UTXOs:', error instanceof Error ? error.message : 'Unknown error');
+        }
+    };
 
     const handleSearchTransaction = async (query: string) => {
         setIsLoading(true);
@@ -285,6 +426,28 @@ export default function SearchBar() {
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Unknown error');
             setBlockResult(null);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const getBalanceByAddress = async (address: string) => {
+        setIsLoading(true);
+        setError(null);
+        setSearchPerformed(true);
+        setSearchedAddress(address);
+        setBalance(undefined);
+        setTransactionResult(null);
+        setBlockResult(null);
+        try {
+            const result = await fetchFromAPI<Array<{ amount: number }>>("/wallet/wallet1", "listunspent", [0, 9999999, [address]]);
+
+            const balance = result.reduce((sum: number, utxo) => sum + utxo.amount, 0);
+            setBalance(balance);
+            return balance;
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Unknown error');
+            return 0;
         } finally {
             setIsLoading(false);
         }
@@ -376,6 +539,44 @@ export default function SearchBar() {
         </div>
     );
 
+    const WalletBalanceDetails = ({ address, walletName, balance }: WalletBalanceDetailsProps) => (
+        <div className="bg-zinc-950 rounded-lg shadow-lg p-4">
+            <div className="flex flex-row items-center mb-4">
+                <FaWallet className="text-orange-500 text-2xl mr-2" />
+                <h2 className="text-xl font-bold text-orange-500">Wallet Balance Details</h2>
+            </div>
+
+            {/* Desktop View */}
+            <div className="hidden sm:block overflow-x-auto">
+                <table className="w-full border-collapse border border-gray-600 text-sm">
+                    <thead>
+                        <tr className="bg-zinc-800 text-gray-400">
+                            <th className="border border-gray-600 px-4 py-2 text-left">Address</th>
+                            <th className="border border-gray-600 px-4 py-2 text-left">Wallet Name</th>
+                            <th className="border border-gray-600 px-4 py-2 text-left">Balance (BTC)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr className="hover:bg-zinc-800">
+                            <td className="border border-gray-600 px-4 py-2 break-all">{address}</td>
+                            <td className="border border-gray-600 px-4 py-2">{walletName}</td>
+                            <td className="border border-gray-600 px-4 py-2">{balance}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Mobile View */}
+            <div className="sm:hidden">
+                <div className="border border-gray-600 mb-4 p-4 rounded bg-zinc-900 text-gray-400 space-y-2">
+                    <p><span className="font-bold text-orange-500">Address:</span> <span className="break-all">{address}</span></p>
+                    <p><span className="font-bold text-orange-500">Wallet Name:</span> {walletName}</p>
+                    <p><span className="font-bold text-orange-500">Balance:</span> {balance} BTC</p>
+                </div>
+            </div>
+        </div>
+    );
+
     return (
         <div className="bg-zinc-950 py-4 shadow-sm flex flex-col items-center space-y-4">
             {/* Transaction Search */}
@@ -392,6 +593,13 @@ export default function SearchBar() {
                 isLoading={isLoading}
             />
 
+            {/* Wallet Balance Search */}
+            <SearchField
+                onSearch={getBalanceByAddress}
+                placeholder="Enter a wallet address"
+                isLoading={isLoading}
+            />
+
             {/* Results */}
             <div className="p-4 sm:p-8 max-w-screen-lg mx-auto">
                 {error && (
@@ -404,10 +612,24 @@ export default function SearchBar() {
                         <FaCube className="animate-spin text-orange-500 text-4xl" />
                     </div>
                 )}
-                {transactionResult && <TransactionDetails transaction={transactionResult} />}
-                {blockResult && <BlockDetails block={blockResult} />}
+                {!isLoading && !error && (
+                    <>
+                        {transactionResult && (
+                            <TransactionDetails transaction={transactionResult} />
+                        )}
+                        {!transactionResult && blockResult && (
+                            <BlockDetails block={blockResult} />
+                        )}
+                        {!transactionResult && !blockResult && searchPerformed && balance !== undefined && (
+                            <WalletBalanceDetails
+                                address={searchedAddress}
+                                walletName="wallet1"
+                                balance={balance ?? 0}
+                            />
+                        )}
+                    </>
+                )}
             </div>
-
 
         </div>
     );

@@ -15,6 +15,7 @@ interface Block {
     confirmations: number;
     time: number;
     tx: string[];
+    size: number;
 }
 
 interface WalletBalanceDetailsProps {
@@ -53,7 +54,7 @@ const SearchField = ({ onSearch, placeholder, isLoading }: SearchFieldProps) => 
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full sm:w-[550px] px-2 py-2 caret-orange-500 text-gray-600 bg-zinc-950 border-orange-500 border-2 focus:outline-none focus:text-white transition rounded"
+                className="w-full sm:w-[550px] px-2 py-2 caret-orange-500 text-gray-600 bg-zinc-950 border-gray-500 border-2 focus:outline-none focus:text-white focus:border-orange-500 transition rounded"
             />
             <button
                 onClick={handleSearch}
@@ -411,7 +412,15 @@ export default function SearchBar() {
             setTransactionResult(result);
             setBlockResult(null);
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Unknown error');
+            if (error instanceof Error) {
+                if (error.message.includes('500')) {
+                    setError(`Server Error: The server encountered an internal error when processing your request. Please check if ${query} is a valid transaction ID.`);
+                } else {
+                    setError(error.message);
+                }
+            } else {
+                setError('An unknown error occurred.');
+            }
             setTransactionResult(null);
         } finally {
             setIsLoading(false);
@@ -426,7 +435,11 @@ export default function SearchBar() {
             setBlockResult(result);
             setTransactionResult(null);
         } catch (error) {
-            setError(error instanceof Error ? error.message : 'Unknown error');
+            if (error instanceof Error && error.message.includes('Block not found')) {
+                setError(`Block with hash ${query} not found.`);
+            } else {
+                setError(error instanceof Error ? error.message : 'Unknown error');
+            }
             setBlockResult(null);
         } finally {
             setIsLoading(false);
@@ -456,7 +469,7 @@ export default function SearchBar() {
     };
 
     const TransactionDetails = ({ transaction }: { transaction: Transaction }) => (
-        <div className="bg-zinc-950 rounded-lg shadow-lg p-4">
+        <div className="bg-zinc-950 rounded-lg shadow-lg p-4  flex items-center flex-col">
             <div className="flex flex-row items-center mb-4">
                 <FaExchangeAlt className="text-orange-500 text-2xl mr-2" />
                 <h2 className="text-xl font-bold text-orange-500">Transaction Details</h2>
@@ -466,7 +479,7 @@ export default function SearchBar() {
             <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-600 text-sm">
                     <thead>
-                        <tr className="bg-zinc-800 text-gray-400">
+                        <tr className="bg-zinc-900 text-gray-400">
                             <th className="border border-gray-600 px-4 py-2 text-left">Transaction ID</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Block Hash</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Confirmations</th>
@@ -475,7 +488,7 @@ export default function SearchBar() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="hover:bg-zinc-800">
+                        <tr className="hover:bg-zinc-900 text-gray-400 hover:text-gray-300">
                             <td className="border border-gray-600 px-4 py-2 break-all">{transaction.txid}</td>
                             <td className="border border-gray-600 px-4 py-2 break-all">{transaction.blockhash || 'Unconfirmed'}</td>
                             <td className="border border-gray-600 px-4 py-2">{transaction.confirmations || 0}</td>
@@ -487,8 +500,8 @@ export default function SearchBar() {
             </div>
 
             {/* Mobile View */}
-            <div className="sm:hidden">
-                <div className="border border-gray-600 mb-4 p-4 rounded bg-zinc-900 text-gray-400 space-y-2">
+            <div className="sm:hidden text-gray-400">
+                <div className="p-4 rounded bg-zinc-900 space-y-1 -m-2">
                     <p><span className="font-bold text-orange-500">Transaction ID:</span> <span className="break-all">{transaction.txid}</span></p>
                     <p><span className="font-bold text-orange-500">Block Hash:</span> <span className="break-all">{transaction.blockhash || 'Unconfirmed'}</span></p>
                     <p><span className="font-bold text-orange-500">Confirmations:</span> {transaction.confirmations || 0}</p>
@@ -500,7 +513,7 @@ export default function SearchBar() {
     );
 
     const BlockDetails = ({ block }: { block: Block }) => (
-        <div className="bg-zinc-950 rounded-lg shadow-lg p-4">
+        <div className="bg-zinc-950 rounded-lg shadow-lg p-4 flex items-center flex-col">
             <div className="flex flex-row items-center mb-4">
                 <FaCube className="text-orange-500 text-2xl mr-2" />
                 <h2 className="text-xl font-bold text-orange-500">Block Details</h2>
@@ -509,40 +522,43 @@ export default function SearchBar() {
             <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-600 text-sm">
                     <thead>
-                        <tr className="bg-zinc-800 text-gray-400">
+                        <tr className="bg-zinc-900 text-gray-400">
                             <th className="border border-gray-600 px-4 py-2 text-left">Block Hash</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Height</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Confirmations</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Time</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Transactions</th>
+                            <th className="border border-gray-600 px-4 py-2 text-left">Size (bytes)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="hover:bg-zinc-800">
+                        <tr className="hover:bg-zinc-900 text-gray-400 hover:text-gray-300">
                             <td className="border border-gray-600 px-4 py-2 break-all">{block.hash}</td>
                             <td className="border border-gray-600 px-4 py-2">{block.height}</td>
                             <td className="border border-gray-600 px-4 py-2">{block.confirmations}</td>
                             <td className="border border-gray-600 px-4 py-2">{new Date(block.time * 1000).toLocaleString()}</td>
                             <td className="border border-gray-600 px-4 py-2">{block.tx.length}</td>
+                            <td className="border border-gray-600 px-4 py-2">{block.size}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div className="sm:hidden">
-                <div className="border border-gray-600 mb-4 p-4 rounded bg-zinc-900 text-gray-400 space-y-2">
+            <div className="sm:hidden text-gray-400">
+                <div className="p-4 rounded bg-zinc-900 space-y-1 -m-2">
                     <p><span className="font-bold text-orange-500">Block Hash:</span> <span className="break-all">{block.hash}</span></p>
                     <p><span className="font-bold text-orange-500">Height:</span> {block.height}</p>
                     <p><span className="font-bold text-orange-500">Confirmations:</span> {block.confirmations}</p>
                     <p><span className="font-bold text-orange-500">Time:</span> {new Date(block.time * 1000).toLocaleString()}</p>
                     <p><span className="font-bold text-orange-500">Transactions:</span> {block.tx.length}</p>
+                    <p><span className="font-bold text-orange-500">Size (bytes):</span> {block.size}</p>
                 </div>
             </div>
         </div>
     );
 
     const WalletBalanceDetails = ({ address, walletName, balance }: WalletBalanceDetailsProps) => (
-        <div className="bg-zinc-950 rounded-lg shadow-lg p-4">
+        <div className="bg-zinc-950 rounded-lg shadow-lg p-4 flex items-center flex-col">
             <div className="flex flex-row items-center mb-4">
                 <FaWallet className="text-orange-500 text-2xl mr-2" />
                 <h2 className="text-xl font-bold text-orange-500">Wallet Balance Details</h2>
@@ -552,14 +568,14 @@ export default function SearchBar() {
             <div className="hidden sm:block overflow-x-auto">
                 <table className="w-full border-collapse border border-gray-600 text-sm">
                     <thead>
-                        <tr className="bg-zinc-800 text-gray-400">
+                        <tr className="bg-zinc-900 text-gray-400">
                             <th className="border border-gray-600 px-4 py-2 text-left">Address</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Wallet Name</th>
                             <th className="border border-gray-600 px-4 py-2 text-left">Balance (BTC)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="hover:bg-zinc-800">
+                        <tr className="hover:bg-zinc-900 text-gray-400 hover:text-gray-300">
                             <td className="border border-gray-600 px-4 py-2 break-all">{address}</td>
                             <td className="border border-gray-600 px-4 py-2">{walletName}</td>
                             <td className="border border-gray-600 px-4 py-2">{balance}</td>
@@ -633,6 +649,38 @@ export default function SearchBar() {
                 )}
             </div>
 
+            {/* Test Buttons 
+            <div className="max-w-[1280px] mx-auto mt-40 flex flex-col items-center justify-center gap-2">
+                <h2 className="text-xl font-bold text-gray-400 -mt-4">Tests</h2>
+                <button onClick={listUnspent}
+                    className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
+                    List UTXOs
+                </button>
+                <button onClick={listLastTransactions}
+                    className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
+                    List Last Transactions
+                </button>
+                <button onClick={listLastBlocks}
+                    className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
+                    List Last Blocks
+                </button>
+                <button onClick={listAllWallets}
+                    className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
+                    List All Wallets
+                </button>
+                <button onClick={listAllWalletsWithBalances}
+                    className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
+                    List All Wallets with Balances
+                </button>
+                <button onClick={listUnspentForAddress}
+                    className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
+                    List UTXOs for Address
+                </button>
+                <button onClick={checkBlockCount}
+                    className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
+                    Check Block Count
+                </button>
+            </div> */}
         </div>
     );
 }

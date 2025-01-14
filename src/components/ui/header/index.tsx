@@ -47,7 +47,7 @@ export default function Header() {
                             <a
                                 href="#"
                                 className="px-2 py-1 font-black text-sm border-2 rounded-sm border-orange-500 text-orange-500 hover:border-orange-600 hover:text-orange-600 transition">
-                                Mainnet
+                                regtest
                             </a>
                         </li>
                     </ul>

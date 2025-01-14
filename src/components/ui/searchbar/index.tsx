@@ -105,6 +105,7 @@ export default function SearchBar() {
         return data.result;
     };
 
+    /*
     const listLastTransactions = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
@@ -400,6 +401,7 @@ export default function SearchBar() {
             console.log('Error fetching UTXOs:', error instanceof Error ? error.message : 'Unknown error');
         }
     };
+    */
 
     const handleSearchTransaction = async (query: string) => {
         setIsLoading(true);

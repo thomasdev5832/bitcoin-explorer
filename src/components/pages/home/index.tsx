@@ -30,7 +30,7 @@ export default function Home() {
         <div className="w-full flex flex-col items-center justify-center gap-10">
             <Header />
             <Banner />
-            <SearchBar onSearch={query => console.log(query)} />
+            <SearchBar />
             <div className="max-w-[1280px] mx-auto mt-4 px-4 flex flex-col gap-4">
                 <Blocks blocks={mockBlocks} />
                 <Transactions transactions={mockTransactions} />

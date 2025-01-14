@@ -40,7 +40,7 @@ export default function Header() {
                     <ul className="flex flex-row items-center space-x-4">
                         <li className="border-2 border-gray-400 rounded-sm px-2 py-1 flex items-center">
                             <span className="text-gray-400 text-sm font-black">
-                                {bitcoinPrice ? `$${bitcoinPrice.toLocaleString()}` : "Loading..."}
+                                {bitcoinPrice ? `$${bitcoinPrice.toLocaleString()}` : "..."}
                             </span>
                         </li>
                         <li className="">

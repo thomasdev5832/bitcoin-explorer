@@ -106,233 +106,10 @@ export default function SearchBar() {
         return data.result;
     };
 
-
-    const listLastTransactions = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': AUTH_HEADER,
-                },
-                body: JSON.stringify({
-                    jsonrpc: "1.0",
-                    id: "listtransactions",
-                    method: "listtransactions",
-                    params: ["*", 10]
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message || 'Unknown error fetching transactions');
-            }
-
-            console.log('Last 10 transactions:', data.result);
-        } catch (error) {
-            console.error('Error:', error);
-            console.log('Error fetching transactions:', error instanceof Error ? error.message : 'Unknown error');
-        }
-    };
-
-    const listUnspent = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'text/plain;',
-                    'Authorization': AUTH_HEADER,
-                },
-                body: JSON.stringify({
-                    jsonrpc: "1.0",
-                    id: "listutxos",
-                    method: "listunspent",
-                    params: []
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log('Server response:', data);
-        } catch (error) {
-            console.error('Error:', error);
-            console.log('Error fetching UTXOs:', error instanceof Error ? error.message : 'Unknown error');
-        }
-    };
-
-    const checkBlockCount = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': AUTH_HEADER
-                },
-                body: JSON.stringify({
-                    jsonrpc: "1.0",
-                    id: "getblockcount",
-                    method: "getblockcount",
-                    params: []
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            console.log('Latest block height:', data.result);
-        } catch (error) {
-            console.error('Error:', error);
-            console.log('Error checking block count:', error instanceof Error ? error.message : 'Unknown error');
-        }
-    };
-
-    const listLastBlocks = async () => {
-        try {
-            const blockCountResponse = await fetch(`${API_BASE_URL}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': AUTH_HEADER
-                },
-                body: JSON.stringify({
-                    jsonrpc: "1.0",
-                    id: "getblockcount",
-                    method: "getblockcount",
-                    params: []
-                })
-            });
-
-            if (!blockCountResponse.ok) {
-                throw new Error(`Failed to fetch block count: ${blockCountResponse.status}`);
-            }
-
-            const blockCountData = await blockCountResponse.json();
-            const latestBlockHeight = blockCountData.result;
-
-            const blocks = [];
-
-            for (let i = latestBlockHeight; i > latestBlockHeight - 10; i--) {
-                const blockHashResponse = await fetch(`${API_BASE_URL}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': AUTH_HEADER
-                    },
-                    body: JSON.stringify({
-                        jsonrpc: "1.0",
-                        id: "getblockhash",
-                        method: "getblockhash",
-                        params: [i]
-                    })
-                });
-
-                if (!blockHashResponse.ok) {
-                    throw new Error(`Failed to fetch block hash for height ${i}: ${blockHashResponse.status}`);
-                }
-
-                const blockHashData = await blockHashResponse.json();
-                const blockHash = blockHashData.result;
-
-                const blockDetailsResponse = await fetch(`${API_BASE_URL}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': AUTH_HEADER
-                    },
-                    body: JSON.stringify({
-                        jsonrpc: "1.0",
-                        id: "getblock",
-                        method: "getblock",
-                        params: [blockHash]
-                    })
-                });
-
-                if (!blockDetailsResponse.ok) {
-                    throw new Error(`Failed to fetch block details for hash ${blockHash}: ${blockDetailsResponse.status}`);
-                }
-
-                const blockDetailsData = await blockDetailsResponse.json();
-                blocks.push(blockDetailsData.result);
-            }
-
-            console.log('Last 10 blocks:', blocks);
-        } catch (error) {
-            console.error('Error:', error);
-            console.log('Error fetching blocks:', error instanceof Error ? error.message : 'Unknown error');
-        }
-    };
-
-    const listAllWallets = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': AUTH_HEADER,
-                },
-                body: JSON.stringify({
-                    jsonrpc: "1.0",
-                    id: "listwallets",
-                    method: "listwallets",
-                    params: []
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message || 'Unknown error fetching wallets');
-            }
-
-            console.log('All Wallets:', data.result);
-        } catch (error) {
-            console.error('Error:', error);
-            console.log('Error fetching wallets:', error instanceof Error ? error.message : 'Unknown error');
-        }
-    };
-
-    const listAllWalletsWithBalances = async () => {
-        try {
-            const walletsResponse = await fetch(`${API_BASE_URL}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': AUTH_HEADER,
-                },
-                body: JSON.stringify({
-                    jsonrpc: "1.0",
-                    id: "listwallets",
-                    method: "listwallets",
-                    params: []
-                })
-            });
-
-            if (!walletsResponse.ok) {
-                throw new Error(`HTTP error listing wallets! status: ${walletsResponse.status}`);
-            }
-
-            const walletsData = await walletsResponse.json();
-
-            if (walletsData.error) {
-                throw new Error(walletsData.error.message || 'Unknown error fetching wallets');
-            }
-
-            const wallets = walletsData.result;
-
-            const walletsWithBalances = await Promise.all(wallets.map(async (wallet: unknown) => {
-                const walletInfoResponse = await fetch(`${API_BASE_URL}/wallet/${wallet}`, {
+    /*
+        const listLastTransactions = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -340,69 +117,292 @@ export default function SearchBar() {
                     },
                     body: JSON.stringify({
                         jsonrpc: "1.0",
-                        id: "getwalletinfo",
-                        method: "getwalletinfo",
+                        id: "listtransactions",
+                        method: "listtransactions",
+                        params: ["*", 10]
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+    
+                if (data.error) {
+                    throw new Error(data.error.message || 'Unknown error fetching transactions');
+                }
+    
+                console.log('Last 10 transactions:', data.result);
+            } catch (error) {
+                console.error('Error:', error);
+                console.log('Error fetching transactions:', error instanceof Error ? error.message : 'Unknown error');
+            }
+        };
+    
+        const listUnspent = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;',
+                        'Authorization': AUTH_HEADER,
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: "1.0",
+                        id: "listutxos",
+                        method: "listunspent",
                         params: []
                     })
                 });
-
-                if (!walletInfoResponse.ok) {
-                    console.error(`Error fetching info for wallet ${wallet}:`, walletInfoResponse.status);
-                    return { name: wallet, balance: 'Error fetching balance' };
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                const walletInfo = await walletInfoResponse.json();
-
-                if (walletInfo.error) {
-                    console.error(`Error fetching info for wallet ${wallet}:`, walletInfo.error.message);
-                    return { name: wallet, balance: 'Error fetching balance' };
+                const data = await response.json();
+                console.log('Server response:', data);
+            } catch (error) {
+                console.error('Error:', error);
+                console.log('Error fetching UTXOs:', error instanceof Error ? error.message : 'Unknown error');
+            }
+        };
+    
+        const checkBlockCount = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': AUTH_HEADER
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: "1.0",
+                        id: "getblockcount",
+                        method: "getblockcount",
+                        params: []
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                return { name: wallet, balance: walletInfo.result.balance };
-            }));
-
-            console.log('Wallets with Balances:', walletsWithBalances);
-        } catch (error) {
-            console.error('Error:', error);
-            console.log('Error fetching wallets or balances:', error instanceof Error ? error.message : 'Unknown error');
-        }
-    };
-
-    const listUnspentForAddress = async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': AUTH_HEADER,
-                },
-                body: JSON.stringify({
-                    jsonrpc: "1.0",
-                    id: "listunspent",
-                    method: "listunspent",
-                    params: []
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                console.log('Latest block height:', data.result);
+            } catch (error) {
+                console.error('Error:', error);
+                console.log('Error checking block count:', error instanceof Error ? error.message : 'Unknown error');
             }
-
-            const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message || 'Unknown error fetching UTXOs');
+        };
+    
+        const listLastBlocks = async () => {
+            try {
+                const blockCountResponse = await fetch(`${API_BASE_URL}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': AUTH_HEADER
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: "1.0",
+                        id: "getblockcount",
+                        method: "getblockcount",
+                        params: []
+                    })
+                });
+    
+                if (!blockCountResponse.ok) {
+                    throw new Error(`Failed to fetch block count: ${blockCountResponse.status}`);
+                }
+    
+                const blockCountData = await blockCountResponse.json();
+                const latestBlockHeight = blockCountData.result;
+    
+                const blocks = [];
+    
+                for (let i = latestBlockHeight; i > latestBlockHeight - 10; i--) {
+                    const blockHashResponse = await fetch(`${API_BASE_URL}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': AUTH_HEADER
+                        },
+                        body: JSON.stringify({
+                            jsonrpc: "1.0",
+                            id: "getblockhash",
+                            method: "getblockhash",
+                            params: [i]
+                        })
+                    });
+    
+                    if (!blockHashResponse.ok) {
+                        throw new Error(`Failed to fetch block hash for height ${i}: ${blockHashResponse.status}`);
+                    }
+    
+                    const blockHashData = await blockHashResponse.json();
+                    const blockHash = blockHashData.result;
+    
+                    const blockDetailsResponse = await fetch(`${API_BASE_URL}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': AUTH_HEADER
+                        },
+                        body: JSON.stringify({
+                            jsonrpc: "1.0",
+                            id: "getblock",
+                            method: "getblock",
+                            params: [blockHash]
+                        })
+                    });
+    
+                    if (!blockDetailsResponse.ok) {
+                        throw new Error(`Failed to fetch block details for hash ${blockHash}: ${blockDetailsResponse.status}`);
+                    }
+    
+                    const blockDetailsData = await blockDetailsResponse.json();
+                    blocks.push(blockDetailsData.result);
+                }
+    
+                console.log('Last 10 blocks:', blocks);
+            } catch (error) {
+                console.error('Error:', error);
+                console.log('Error fetching blocks:', error instanceof Error ? error.message : 'Unknown error');
             }
-
-            // Listar endereços únicos com saldo
-            const addresses = [...new Set(data.result.map((utxo: { address: unknown; }) => utxo.address))];
-            console.log('Addresses with balance:', addresses);
-        } catch (error) {
-            console.error('Error:', error);
-            console.log('Error fetching UTXOs:', error instanceof Error ? error.message : 'Unknown error');
-        }
-    };
-
+        };
+    
+        const listAllWallets = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': AUTH_HEADER,
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: "1.0",
+                        id: "listwallets",
+                        method: "listwallets",
+                        params: []
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+    
+                if (data.error) {
+                    throw new Error(data.error.message || 'Unknown error fetching wallets');
+                }
+    
+                console.log('All Wallets:', data.result);
+            } catch (error) {
+                console.error('Error:', error);
+                console.log('Error fetching wallets:', error instanceof Error ? error.message : 'Unknown error');
+            }
+        };
+    
+        const listAllWalletsWithBalances = async () => {
+            try {
+                const walletsResponse = await fetch(`${API_BASE_URL}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': AUTH_HEADER,
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: "1.0",
+                        id: "listwallets",
+                        method: "listwallets",
+                        params: []
+                    })
+                });
+    
+                if (!walletsResponse.ok) {
+                    throw new Error(`HTTP error listing wallets! status: ${walletsResponse.status}`);
+                }
+    
+                const walletsData = await walletsResponse.json();
+    
+                if (walletsData.error) {
+                    throw new Error(walletsData.error.message || 'Unknown error fetching wallets');
+                }
+    
+                const wallets = walletsData.result;
+    
+                const walletsWithBalances = await Promise.all(wallets.map(async (wallet: unknown) => {
+                    const walletInfoResponse = await fetch(`${API_BASE_URL}/wallet/${wallet}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': AUTH_HEADER,
+                        },
+                        body: JSON.stringify({
+                            jsonrpc: "1.0",
+                            id: "getwalletinfo",
+                            method: "getwalletinfo",
+                            params: []
+                        })
+                    });
+    
+                    if (!walletInfoResponse.ok) {
+                        console.error(`Error fetching info for wallet ${wallet}:`, walletInfoResponse.status);
+                        return { name: wallet, balance: 'Error fetching balance' };
+                    }
+    
+                    const walletInfo = await walletInfoResponse.json();
+    
+                    if (walletInfo.error) {
+                        console.error(`Error fetching info for wallet ${wallet}:`, walletInfo.error.message);
+                        return { name: wallet, balance: 'Error fetching balance' };
+                    }
+    
+                    return { name: wallet, balance: walletInfo.result.balance };
+                }));
+    
+                console.log('Wallets with Balances:', walletsWithBalances);
+            } catch (error) {
+                console.error('Error:', error);
+                console.log('Error fetching wallets or balances:', error instanceof Error ? error.message : 'Unknown error');
+            }
+        };
+    
+        const listUnspentForAddress = async () => {
+            try {
+                const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': AUTH_HEADER,
+                    },
+                    body: JSON.stringify({
+                        jsonrpc: "1.0",
+                        id: "listunspent",
+                        method: "listunspent",
+                        params: []
+                    })
+                });
+    
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+    
+                const data = await response.json();
+    
+                if (data.error) {
+                    throw new Error(data.error.message || 'Unknown error fetching UTXOs');
+                }
+    
+                // Listar endereços únicos com saldo
+                const addresses = [...new Set(data.result.map((utxo: { address: unknown; }) => utxo.address))];
+                console.log('Addresses with balance:', addresses);
+            } catch (error) {
+                console.error('Error:', error);
+                console.log('Error fetching UTXOs:', error instanceof Error ? error.message : 'Unknown error');
+            }
+        };
+    */
 
     const handleSearchTransaction = async (query: string) => {
         setIsLoading(true);
@@ -729,7 +729,7 @@ export default function SearchBar() {
                 )}
             </div>
 
-            {/* Test Buttons  */}
+            {/* Test Buttons  
             <div className="max-w-[1280px] mx-auto mt-40 flex flex-col items-center justify-center gap-2">
                 <h2 className="text-xl font-bold text-gray-400 -mt-4">Tests</h2>
                 <button onClick={listUnspent}
@@ -761,6 +761,7 @@ export default function SearchBar() {
                     Check Block Count
                 </button>
             </div>
+            */}
         </div>
     );
 }

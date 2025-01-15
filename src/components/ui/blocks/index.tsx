@@ -117,7 +117,12 @@ export default function Blocks() {
     }, [API_BASE_URL, AUTH_HEADER]);
 
     if (isLoading) {
-        return <div className="text-orange-400 font-black">Loading blocks...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center gap-2">
+                <FaCube className="animate-spin text-orange-500 text-4xl" />
+                <div className="text-orange-500 font-black text-2xl">Loading blocks...</div>
+            </div>
+        );
     }
 
     if (error) {
@@ -160,7 +165,7 @@ export default function Blocks() {
                 {blocks.map((block) => (
                     <div
                         key={block.height}
-                        className="border-gray-600 mb-4 p-4 rounded bg-zinc-900 text-gray-400"
+                        className="mb-4 p-4 rounded bg-zinc-900 text-gray-400 border-zinc-900 hover:border-gray-500 border-2 transition"
                     >
                         <p>
                             <span className="font-bold text-orange-500">Height:</span> {block.height}

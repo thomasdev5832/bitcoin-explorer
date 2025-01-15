@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import btcLogo from "../../../assets/btc.svg";
+import { FaNetworkWired } from "react-icons/fa";
 
 export default function Header() {
     const [bitcoinPrice, setBitcoinPrice] = useState<number | null>(null);
@@ -29,12 +30,13 @@ export default function Header() {
             <div className="max-w-[1280px] mx-auto px-4 flex justify-between items-center py-4">
 
                 <h1 className="flex flex-row text-2xl font-black text-orange-500">
-                    <img
-                        src={btcLogo}
-                        alt="Logo"
-                        className="w-8 ml-2 object-contain"
-                    />
-
+                    <a href="/">
+                        <img
+                            src={btcLogo}
+                            alt="Logo"
+                            className="w-8 ml-2 object-contain cursor-pointer"
+                        />
+                    </a>
                 </h1>
                 <nav>
                     <ul className="flex flex-row items-center space-x-4">
@@ -43,10 +45,11 @@ export default function Header() {
                                 {bitcoinPrice ? `$${bitcoinPrice.toLocaleString()}` : "..."}
                             </span>
                         </li>
-                        <li className="">
+                        <li className="flex flex-row items-center justify-center gap-1 px-2 py-1 font-black text-sm border-2 rounded-sm border-orange-500 text-orange-500 hover:border-orange-600 hover:text-orange-600 transition">
+                            <FaNetworkWired className="text-base" />
                             <a
                                 href="#"
-                                className="px-2 py-1 font-black text-sm border-2 rounded-sm border-orange-500 text-orange-500 hover:border-orange-600 hover:text-orange-600 transition">
+                            >
                                 regtest
                             </a>
                         </li>

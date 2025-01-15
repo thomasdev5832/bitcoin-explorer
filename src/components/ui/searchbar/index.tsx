@@ -54,7 +54,7 @@ const SearchField = ({ onSearch, placeholder, isLoading }: SearchFieldProps) => 
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="w-full sm:w-[550px] px-2 py-2 caret-orange-500 text-gray-600 bg-zinc-950 border-gray-500 border-2 focus:outline-none focus:text-white focus:border-orange-500 transition rounded"
+                className="w-full sm:w-[550px] px-2 py-2 caret-orange-500 text-gray-600 hover:border-orange-500 bg-zinc-950 border-gray-500 border-2 focus:outline-none focus:text-white focus:border-orange-500 transition rounded"
             />
             <button
                 onClick={handleSearch}
@@ -431,12 +431,16 @@ export default function SearchBar() {
         setIsLoading(true);
         setError(null);
         try {
-            const result = await fetchFromAPI<Block>("", "getblock", [query, 2]);
+            // Primeiro, obtemos o hash do bloco pelo height
+            const blockHash = await fetchFromAPI<string>("", "getblockhash", [parseInt(query, 10)]);
+
+            // Depois, buscamos os detalhes do bloco usando o hash obtido
+            const result = await fetchFromAPI<Block>("", "getblock", [blockHash, 2]);
             setBlockResult(result);
             setTransactionResult(null);
         } catch (error) {
             if (error instanceof Error && error.message.includes('Block not found')) {
-                setError(`Block with hash ${query} not found.`);
+                setError(`Block with height ${query} not found.`);
             } else {
                 setError(error instanceof Error ? error.message : 'Unknown error');
             }
@@ -607,7 +611,7 @@ export default function SearchBar() {
             {/* Block Search */}
             <SearchField
                 onSearch={handleSearchBlock}
-                placeholder="Enter a block hash"
+                placeholder="Enter a block height"
                 isLoading={isLoading}
             />
 

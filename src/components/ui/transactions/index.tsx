@@ -75,7 +75,12 @@ export default function Transactions() {
     }, [listLastTransactions]);
 
     if (isLoading) {
-        return <div className="text-orange-500 font-black">Loading transactions...</div>;
+        return (
+            <div className="flex flex-col items-center justify-center gap-2">
+                <FaExchangeAlt className="animate-spin text-orange-500 text-4xl" />
+                <div className="text-orange-500 font-black text-2xl">Loading transactions...</div>
+            </div>
+        );
     }
 
     if (error) {
@@ -114,7 +119,7 @@ export default function Transactions() {
                 {transactions.map((transaction) => (
                     <div
                         key={transaction.hash}
-                        className=" border-gray-600 mb-4 p-4 rounded bg-zinc-900 text-gray-400"
+                        className="mb-4 p-4 rounded bg-zinc-900 text-gray-400 border-zinc-900 hover:border-gray-500 border-2 transition"
                     >
                         <p className="break-all">
                             <span className="font-bold text-orange-500">Hash:</span> {transaction.hash}

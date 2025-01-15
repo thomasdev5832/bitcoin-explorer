@@ -121,15 +121,18 @@ export default function Transactions() {
                         key={transaction.hash}
                         className="mb-4 p-4 rounded bg-zinc-900 text-gray-400 border-zinc-900 hover:border-gray-500 border-2 transition"
                     >
-                        <p className="break-all">
-                            <span className="font-bold text-orange-500">Hash:</span> {transaction.hash}
-                        </p>
-                        <p>
-                            <span className="font-bold text-orange-500">Amount:</span> {transaction.amount} BTC
-                        </p>
-                        <p>
-                            <span className="font-bold text-orange-500">Timestamp:</span> {transaction.timestamp}
-                        </p>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Hash:</span>
+                            <span className="break-all text-right">{transaction.hash}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Amount:</span>
+                            <span className="break-all text-right">{transaction.amount} BTC</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Timestamp:</span>
+                            <span className="break-all text-right">{transaction.timestamp}</span>
+                        </div>
                     </div>
                 ))}
             </div>

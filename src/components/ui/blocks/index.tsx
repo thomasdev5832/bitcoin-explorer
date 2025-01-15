@@ -167,21 +167,26 @@ export default function Blocks() {
                         key={block.height}
                         className="mb-4 p-4 rounded bg-zinc-900 text-gray-400 border-zinc-900 hover:border-gray-500 border-2 transition"
                     >
-                        <p>
-                            <span className="font-bold text-orange-500">Height:</span> {block.height}
-                        </p>
-                        <p>
-                            <span className="font-bold text-orange-500">Timestamp:</span> {block.timestamp}
-                        </p>
-                        <p>
-                            <span className="font-bold text-orange-500">Miner:</span> {block.miner}
-                        </p>
-                        <p>
-                            <span className="font-bold text-orange-500">Transactions:</span> {block.transactions}
-                        </p>
-                        <p>
-                            <span className="font-bold text-orange-500">Size (bytes):</span> {block.size}
-                        </p>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Height:</span>
+                            <span className="break-all text-right">{block.height}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Timestamp:</span>
+                            <span className="break-all text-right">{block.timestamp}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Miner:</span>
+                            <span className="break-all text-right">{block.miner}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Transactions:</span>
+                            <span className="break-all text-right">{block.transactions}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="font-bold text-orange-500">Size (bytes):</span>
+                            <span className="break-all text-right">{block.size}</span>
+                        </div>
                     </div>
                 ))}
             </div>

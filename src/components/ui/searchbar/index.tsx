@@ -106,7 +106,7 @@ export default function SearchBar() {
         return data.result;
     };
 
-    /*
+
     const listLastTransactions = async () => {
         try {
             const response = await fetch(`${API_BASE_URL}/wallet/wallet1`, {
@@ -402,7 +402,7 @@ export default function SearchBar() {
             console.log('Error fetching UTXOs:', error instanceof Error ? error.message : 'Unknown error');
         }
     };
-    */
+
 
     const handleSearchTransaction = async (query: string) => {
         setIsLoading(true);
@@ -473,14 +473,13 @@ export default function SearchBar() {
     };
 
     const TransactionDetails = ({ transaction }: { transaction: Transaction }) => (
-        <div className="bg-zinc-950 rounded-lg shadow-lg p-4  flex items-center flex-col">
-            <div className="flex flex-row items-center mb-4">
-                <FaExchangeAlt className="text-orange-500 text-2xl mr-2" />
-                <h2 className="text-xl font-bold text-orange-500">Transaction Details</h2>
-            </div>
-
+        <div className="bg-zinc-950 rounded-lg shadow-lg m-4 flex items-center flex-col">
             {/* Desktop View */}
             <div className="hidden sm:block overflow-x-auto">
+                <div className="flex flex-row items-center mb-4">
+                    <FaExchangeAlt className="text-orange-500 text-2xl mr-2" />
+                    <h2 className="text-xl font-bold text-orange-500">Transaction Details</h2>
+                </div>
                 <table className="w-full border-collapse border border-gray-600 text-sm">
                     <thead>
                         <tr className="bg-zinc-900 text-gray-400">
@@ -504,13 +503,38 @@ export default function SearchBar() {
             </div>
 
             {/* Mobile View */}
-            <div className="sm:hidden text-gray-400">
-                <div className="p-4 rounded bg-zinc-900 space-y-1 -m-2">
-                    <p><span className="font-bold text-orange-500">Transaction ID:</span> <span className="break-all">{transaction.txid}</span></p>
-                    <p><span className="font-bold text-orange-500">Block Hash:</span> <span className="break-all">{transaction.blockhash || 'Unconfirmed'}</span></p>
-                    <p><span className="font-bold text-orange-500">Confirmations:</span> {transaction.confirmations || 0}</p>
-                    <p><span className="font-bold text-orange-500">Time:</span> {transaction.time ? new Date(transaction.time * 1000).toLocaleString() : 'N/A'}</p>
-                    <p><span className="font-bold text-orange-500">Total Amount:</span> {transaction.vout.reduce((sum, output) => sum + output.value, 0).toFixed(8)} BTC</p>
+            <div className="sm:hidden rounded bg-zinc-900 space-y-1 -m-2 p-6 border-2 border-gray-600">
+                <div className="flex flex-col items-center mb-4">
+                    <div className="flex flex-row items-center">
+                        <FaExchangeAlt className="text-orange-500 text-2xl mr-2" />
+                        <h2 className="text-lg font-bold text-orange-500">Transaction Details</h2>
+                    </div>
+                </div>
+                <div className="space-y-1">
+                    {[
+                        { label: 'Transaction ID:', value: transaction.txid ? `${transaction.txid.slice(0, 4)}...${transaction.txid.slice(-4)}` : 'N/A', fullValue: transaction.txid },
+                        { label: 'Block Hash:', value: transaction.blockhash ? `${transaction.blockhash.slice(0, 4)}...${transaction.blockhash.slice(-4)}` : 'Unconfirmed', fullValue: transaction.blockhash },
+                        { label: 'Confirmations:', value: transaction.confirmations || 0 },
+                        { label: 'Time:', value: transaction.time ? new Date(transaction.time * 1000).toLocaleString() : 'N/A' },
+                        { label: 'Total Amount:', value: `${Math.floor(transaction.vout.reduce((sum, output) => sum + output.value, 0))} BTC` },
+                    ].map((item, index) => (
+                        <div key={index} className="flex justify-between">
+                            <span className="font-bold text-orange-500">{item.label}</span>
+                            {item.fullValue ? (
+                                <button
+                                    className="break-all text-right text-gray-400 font-bold hover:underline cursor-pointer"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(item.fullValue);
+                                        alert(`${item.label} copied!`);
+                                    }}
+                                >
+                                    {item.value}
+                                </button>
+                            ) : (
+                                <span className="break-all text-right text-gray-400">{item.value}</span>
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -518,12 +542,12 @@ export default function SearchBar() {
 
     const BlockDetails = ({ block }: { block: Block }) => (
         <div className="bg-zinc-950 rounded-lg shadow-lg p-4 flex items-center flex-col">
-            <div className="flex flex-row items-center mb-4">
-                <FaCube className="text-orange-500 text-2xl mr-2" />
-                <h2 className="text-xl font-bold text-orange-500">Block Details</h2>
-            </div>
-
+            {/* Desktop View */}
             <div className="hidden sm:block overflow-x-auto">
+                <div className="flex flex-row items-center mb-4">
+                    <FaCube className="text-orange-500 text-2xl mr-2" />
+                    <h2 className="text-xl font-bold text-orange-500">Block Details</h2>
+                </div>
                 <table className="w-full border-collapse border border-gray-600 text-sm">
                     <thead>
                         <tr className="bg-zinc-900 text-gray-400">
@@ -548,14 +572,40 @@ export default function SearchBar() {
                 </table>
             </div>
 
-            <div className="sm:hidden text-gray-400">
-                <div className="p-4 rounded bg-zinc-900 space-y-1 -m-2">
-                    <p><span className="font-bold text-orange-500">Block Hash:</span> <span className="break-all">{block.hash}</span></p>
-                    <p><span className="font-bold text-orange-500">Height:</span> {block.height}</p>
-                    <p><span className="font-bold text-orange-500">Confirmations:</span> {block.confirmations}</p>
-                    <p><span className="font-bold text-orange-500">Time:</span> {new Date(block.time * 1000).toLocaleString()}</p>
-                    <p><span className="font-bold text-orange-500">Transactions:</span> {block.tx.length}</p>
-                    <p><span className="font-bold text-orange-500">Size (bytes):</span> {block.size}</p>
+            {/* Mobile View */}
+            <div className="sm:hidden rounded bg-zinc-900 space-y-1 -m-2 p-6 border-2 border-gray-600">
+                <div className="flex flex-col items-center mb-4">
+                    <div className="flex flex-row items-center">
+                        <FaCube className="text-orange-500 text-2xl mr-2" />
+                        <h2 className="text-lg font-bold text-orange-500">Block Details</h2>
+                    </div>
+                </div>
+                <div className="space-y-1">
+                    {[
+                        { label: 'Block Hash:', value: `${block.hash.slice(0, 4)}...${block.hash.slice(-4)}`, fullValue: block.hash },
+                        { label: 'Height:', value: block.height },
+                        { label: 'Confirmations:', value: block.confirmations },
+                        { label: 'Time:', value: new Date(block.time * 1000).toLocaleString() },
+                        { label: 'Transactions:', value: block.tx.length },
+                        { label: 'Size (bytes):', value: block.size },
+                    ].map((item, index) => (
+                        <div key={index} className="flex justify-between">
+                            <span className="font-bold text-orange-500">{item.label}</span>
+                            {item.fullValue ? (
+                                <button
+                                    className="break-all text-right text-gray-400 font-bold hover:underline cursor-pointer"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(item.fullValue);
+                                        alert(`${item.label} copied!`);
+                                    }}
+                                >
+                                    {item.value}
+                                </button>
+                            ) : (
+                                <span className="break-all text-right text-gray-400">{item.value}</span>
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -563,13 +613,14 @@ export default function SearchBar() {
 
     const WalletBalanceDetails = ({ address, walletName, balance }: WalletBalanceDetailsProps) => (
         <div className="bg-zinc-950 rounded-lg shadow-lg p-4 flex items-center flex-col">
-            <div className="flex flex-row items-center mb-4">
-                <FaWallet className="text-orange-500 text-2xl mr-2" />
-                <h2 className="text-xl font-bold text-orange-500">Wallet Balance Details</h2>
-            </div>
+
 
             {/* Desktop View */}
             <div className="hidden sm:block overflow-x-auto">
+                <div className="flex flex-row items-center mb-4">
+                    <FaWallet className="text-orange-500 text-2xl mr-2" />
+                    <h2 className="text-xl font-bold text-orange-500">Wallet Balance Details</h2>
+                </div>
                 <table className="w-full border-collapse border border-gray-600 text-sm">
                     <thead>
                         <tr className="bg-zinc-900 text-gray-400">
@@ -589,11 +640,36 @@ export default function SearchBar() {
             </div>
 
             {/* Mobile View */}
-            <div className="sm:hidden">
-                <div className="border border-gray-600 mb-4 p-4 rounded bg-zinc-900 text-gray-400 space-y-2">
-                    <p><span className="font-bold text-orange-500">Address:</span> <span className="break-all">{address}</span></p>
-                    <p><span className="font-bold text-orange-500">Wallet Name:</span> {walletName}</p>
-                    <p><span className="font-bold text-orange-500">Balance:</span> {balance} BTC</p>
+            <div className="sm:hidden rounded bg-zinc-900 space-y-1 -m-2 p-6 border-2 border-gray-600">
+                <div className="flex flex-col items-center mb-4">
+                    <div className="flex flex-row items-center">
+                        <FaExchangeAlt className="text-orange-500 text-2xl mr-2" />
+                        <h2 className="text-lg font-bold text-orange-500">Wallet Details</h2>
+                    </div>
+                </div>
+                <div className="space-y-1">
+                    {[
+                        { label: 'Address:', value: `${address.slice(0, 4)}...${address.slice(-4)}`, fullValue: address },
+                        { label: 'Wallet Name:', value: walletName },
+                        { label: 'Balance:', value: `${balance} BTC` },
+                    ].map((item, index) => (
+                        <div key={index} className="flex justify-between">
+                            <span className="font-bold text-orange-500">{item.label}</span>
+                            {item.fullValue ? (
+                                <button
+                                    className="break-all text-right text-gray-400 font-bold hover:underline cursor-pointer"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(item.fullValue);
+                                        alert(`${item.label} copied!`);
+                                    }}
+                                >
+                                    {item.value}
+                                </button>
+                            ) : (
+                                <span className="break-all text-right text-gray-400">{item.value}</span>
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
@@ -653,7 +729,7 @@ export default function SearchBar() {
                 )}
             </div>
 
-            {/* Test Buttons 
+            {/* Test Buttons  */}
             <div className="max-w-[1280px] mx-auto mt-40 flex flex-col items-center justify-center gap-2">
                 <h2 className="text-xl font-bold text-gray-400 -mt-4">Tests</h2>
                 <button onClick={listUnspent}
@@ -684,7 +760,7 @@ export default function SearchBar() {
                     className="w-full flex items-center justify-center px-4 py-3 -ml-2  bg-orange-500 orange-500 text-gray-900 font-bold hover:bg-orange-600 hover:border-orange-600 rounded transition">
                     Check Block Count
                 </button>
-            </div> */}
+            </div>
         </div>
     );
 }
